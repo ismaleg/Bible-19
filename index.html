@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible Quest V9</title>
+
+<style>
+body{
+font-family:Arial,sans-serif;
+margin:0;
+color:white;
+background:linear-gradient(#06142e,#102a5c,#1d4e89);
+}
+
+.wrap{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.hud,.panel{
+background:rgba(0,0,0,.35);
+padding:15px;
+border-radius:16px;
+}
+
+.hud{
+display:flex;
+justify-content:space-around;
+flex-wrap:wrap;
+}
+
+.panel{
+margin-top:15px;
+}
+
+.choice{
+display:block;
+width:100%;
+padding:14px;
+margin:8px 0;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-size:16px;
+}
+
+.badge{
+display:inline-block;
+background:gold;
+color:black;
+padding:6px 10px;
+margin:4px;
+border-radius:10px;
+}
+
+.sky{
+text-align:center;
+font-size:20px;
+margin-bottom:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="sky">
+⭐ ⭐ 🌙 ⭐ ⭐
+</div>
+
+<div class="hud" id="hud"></div>
+
+<div id="game"></div>
+
+</div>
+
+<script>
+
+let chapter=0;
+let q=-1;
+let score=0;
+let lives=2;
+
+let badges=[];
+let ach=[];
+
+const TOTAL=25;
+
+function getGrade(pct){
+if(pct>=90) return "A 🏆";
+if(pct>=80) return "B ⭐";
+if(pct>=70) return "C 👍";
+if(pct>=60) return "D ⚠️";
+return "F ❌";
+}
+
+const chapters=[
+
+["Prayer",
+"Prayer helps believers grow closer to God and seek guidance.",
+[
+["What is prayer?","Talking with God","Talking only to friends","a"],
+["Why do Christians pray?","To build a relationship with God","To become popular","a"],
+["Can you pray at any time?","Yes","Only on Sundays","a"],
+["Prayer can provide...","Guidance and comfort","More confusion","a"],
+["Which is an example of prayer?","Thanking God","Ignoring God","a"]
+],
+"🙏 Prayer Master"],
+
+["Choices",
+"Godly choices honor God and build strong character.",
+[
+["Temptation is...","Pressure to do wrong","A blessing","a"],
+["Good choices build...","Character","Trouble","a"],
+["Who should guide our choices?","God","Popularity","a"],
+["Peer pressure should be...","Handled wisely","Always followed","a"],
+["Godly choices help us...","Honor God","Ignore God","a"]
+],
+"⚖️ Wise Decision Maker"],
+
+["Forgiveness",
+"Jesus taught forgiveness and grace.",
+[
+["Jesus taught...","Forgiveness","Revenge","a"],
+["Forgiveness heals...","Relationships","Nothing","a"],
+["Forgiveness shows...","Grace","Weakness","a"],
+["Should Christians forgive others?","Yes","Never","a"],
+["Forgiveness removes...","Bitterness","Kindness","a"]
+],
+"🤝 Forgiveness Champion"],
+
+["Trust",
+"Trust God during challenges and difficult moments.",
+[
+["Perseverance means...","Keep going","Quit","a"],
+["Trusting God means...","Relying on Him","Ignoring Him","a"],
+["Faith helps during...","Challenges","Nothing","a"],
+["God is...","Faithful","Unreliable","a"],
+["Believers should...","Keep faith","Give up","a"]
+],
+"🛡️ Trust Walker"],
+
+["Growing",
+"Faith grows through prayer, Bible reading, and serving others.",
+[
+["Bible reading helps...","Grow faith","Forget faith","a"],
+["Serving others is...","Living faith","Unimportant","a"],
+["Faith grows through...","Prayer and learning","Luck","a"],
+["Christians should...","Help others","Only help themselves","a"],
+["Growing faith takes...","Commitment","Nothing","a"]
+],
+"🌱 Growing In Faith"]
+
+];
+function hud(){
+
+let pct=Math.round((score/TOTAL)*100);
+
+document.getElementById("hud").innerHTML=`
+
+<div>❤️ ${"❤️".repeat(lives)}</div>
+
+<div>⭐ ${score}</div>
+
+<div>📈 ${pct}%</div>
+
+<div>📊 ${getGrade(pct)}</div>
+
+<div>🏅 ${badges.length}</div>
+
+<div>🏆 ${ach.length}</div>
+
+`;
+
+}
+
+function trail(){
+
+let p=chapter+1;
+
+return `
+
+<div style="text-align:center;font-size:22px">
+
+🏔️ Summit
+
+<br>
+
+📍5 ${p==5?"🏃":""}
+
+<br>
+
+📍4 ${p==4?"🏃":""}
+
+<br>
+
+📍3 ${p==3?"🏃":""}
+
+<br>
+
+📍2 ${p==2?"🏃":""}
+
+<br>
+
+📍1 ${p==1?"🏃":""}
+
+</div>
+
+`;
+
+}
+
+function draw(){
+
+hud();
+
+const g=document.getElementById("game");
+
+if(chapter>=chapters.length){
+
+let pct=Math.round((score/TOTAL)*100);
+
+let pass=pct>=80;
+
+if(score===25 && !badges.includes("💎 Perfect Score"))
+badges.push("💎 Perfect Score");
+
+if(lives===2 && !badges.includes("❤️ No Mistakes"))
+badges.push("❤️ No Mistakes");
+
+if(pass && !badges.includes("🏔️ Summit Conqueror"))
+badges.push("🏔️ Summit Conqueror");
+
+g.innerHTML=`
+
+<div class='panel'>
+
+<h1>
+
+${pass?"🏆 SUMMIT REACHED":"❌ JOURNEY INCOMPLETE"}
+
+</h1>
+
+<h2>Score: ${score}/25</h2>
+
+<h2>Percentage: ${pct}%</h2>
+
+<h2>Grade: ${getGrade(pct)}</h2>
+
+${pass?
+
+"<p>📸 Take a screenshot and turn it in for assignment credit.</p>"
+
+:
+
+"<p><b>🔄 RETAKE REQUIRED</b></p><p>You lost both lives.</p>"
+
+}
+
+<h3>Badges</h3>
+
+${badges.map(b=>"<span class='badge'>"+b+"</span>").join("")}
+
+<br><br>
+
+<button class='choice'
+
+onclick='chapter=0;q=-1;score=0;lives=2;badges=[];ach=[];draw()'>
+
+🔄 Retry Journey
+
+</button>
+
+</div>
+
+`;
+
+return;
+
+}
+
+let ch=chapters[chapter];
+
+if(q==-1){
+
+g.innerHTML=`
+
+<div class='panel'>
+
+${trail()}
+
+<h2>📖 Chapter ${chapter+1}: ${ch[0]}</h2>
+
+<p>${ch[1]}</p>
+
+<p>
+
+<b>
+
+You only have 2 lives.
+
+Lose both and you fail the assignment.
+
+</b>
+
+</p>
+
+<button class='choice'
+
+onclick='q=0;draw()'>
+
+Start Chapter
+
+</button>
+
+</div>
+
+`;
+
+return;
+
+}
+if(q>=ch[2].length){
+
+ach.push(ch[3]);
+
+const awards=[
+"🥉 Faith Beginner",
+"📖 Lesson Reader",
+"🤝 Forgiveness Helper",
+"🏔️ Mountain Climber",
+"⭐ Quiz Master"
+];
+
+if(chapter<awards.length){
+badges.push(awards[chapter]);
+}
+
+g.innerHTML=`
+
+<div class='panel'>
+
+${trail()}
+
+<h2>🏆 Chapter Complete!</h2>
+
+<p>Achievement Unlocked:</p>
+
+<h3>${ch[3]}</h3>
+
+${badges.map(b=>"<span class='badge'>"+b+"</span>").join("")}
+
+<br><br>
+
+<button class='choice'
+onclick='chapter++;q=-1;draw()'>
+
+Climb Higher
+
+</button>
+
+</div>
+
+`;
+
+return;
+
+}
+
+let qq=ch[2][q];
+
+g.innerHTML=`
+
+<div class='panel'>
+
+${trail()}
+
+<h3>
+
+Question ${(chapter*5)+q+1} of 25
+
+</h3>
+
+<h2>${qq[0]}</h2>
+
+<button class='choice'
+onclick="answer('a')">
+
+${qq[1]}
+
+</button>
+
+<button class='choice'
+onclick="answer('b')">
+
+${qq[2]}
+
+</button>
+
+</div>
+
+`;
+
+}
+
+function answer(a){
+
+if(a===chapters[chapter][2][q][3]){
+
+score++;
+
+q++;
+
+draw();
+
+return;
+
+}
+
+lives--;
+
+if(lives<=0){
+
+chapter=chapters.length;
+
+draw();
+
+return;
+
+}
+
+document.getElementById("game").innerHTML=`
+
+<div class='panel'>
+
+<h2>❌ Wrong Answer</h2>
+
+<p>You lost a life.</p>
+
+<p>
+
+Lives Remaining:
+
+${"❤️".repeat(lives)}
+
+</p>
+
+<button class='choice'
+
+onclick='q++;draw()'>
+
+Continue
+
+</button>
+
+</div>
+
+`;
+
+hud();
+
+}
+
+draw();
+
+</script>
+
+</body>
+
+</html>
